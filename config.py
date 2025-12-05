@@ -1,1 +1,0 @@
-# Configuration (API keys, email settings, constants) for the application
