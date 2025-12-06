@@ -1,46 +1,30 @@
 # Logic for fetching and handling weather data
 
-from utils.api_requests import fetch_data
+import logging
+import requests
+
 import config
 
-def get_weather_data(query: str):
-    """
-    Fetch weather data from the WeatherAPI.
+logger = logging.getLogger(__name__)
+
+def get_weather_data(query: str) -> dict | None :
+    """   Fetch weather data from the WeatherAPI. """
     
-    :return: dict or None, weather data if successful, otherwise None
-    """
-    
-    url = config.WEATHER_URL
-    params = {
-        "key": config.WEATHER_API_KEY,
-        "q": config.QUERY,
-    }
-    weather_data = fetch_data(url, params=params)
-    
-    if weather_data:
+    try:
+        url = config.WEATHER_URL
+        params = {
+            "key": config.WEATHER_API_KEY,
+            "q": config.QUERY,
+        }
+        weather_data = requests.get(url, params).json()
+        
+        if not weather_data:
+            logger.warning("No weather data returned from API")
+            return None
+        
+        logger.debug(f"Weather data fetched successfully for {query}")
         return weather_data
-    else:
-        print(f"Failed to fetch weather data for {query}.")
+    except Exception as e:
+        logger.error(f"Failed to fetch weather data: {e}", exc_info=True)
         return None
       
-
-def get_astronomy_data(query: str, date: str):
-    """
-    Fetch astronomy data from the WeatherAPI.
-    
-    :return: dict or None, astronomy data if successful, otherwise None
-    """
-    
-    url = config.ASTRONOMY_URL
-    params = {
-        "key": config.WEATHER_API_KEY,
-        "q": config.QUERY,
-        "dt": config.TODAY,
-    }
-    astronomy_data = fetch_data(url, params=params)
-    
-    if astronomy_data:
-        return astronomy_data
-    else:
-        print(f"Failed to fetch astronomy data for {query} on {date}.")
-        return None
