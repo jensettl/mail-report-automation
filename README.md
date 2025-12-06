@@ -63,11 +63,11 @@ or schedule the script to run automatically at a specified time each day using `
 ## Email Body Examples
 
 ### Weather Report
-![Weather Report](images/weather_report.png)
+![Weather Report](assets/images/weather_report.png)
 
 ### Stocks Report
-![Stocks Report](images/stocks_report.png)
+![Stocks Report](assets/images/stocks_report.png)
 
 ### Headlines Report
-![Headlines Report](images/headlines_report.png)
+![Headlines Report](assets/images/headlines_report.png)
 
