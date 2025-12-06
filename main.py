@@ -1,42 +1,65 @@
 # Entry point of your application
 
-from services.weather_service import get_weather_data, get_astronomy_data
-from services.stocks_service import get_stock_info
-from services.headlines_service import get_headline_data
+import logging
+from pathlib import Path
 
-from utils.data_cleaner import clean_weather_data, clean_astronomy_data, clean_stock_data, clean_headlines_data
-from utils.email_builder import build_email_body, sendEmail
+from services import weather_service, astronomy_service, stocks_service, headlines_service
+from utils import data_cleaner, email_builder
 
 import config
+
+# Configure logging at module startup (runs once)
+def _configure_logging():
+    """Configure logging for the entire application."""
+    today = config.TODAY
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_dir / f"log-{today}.log"),
+            logging.StreamHandler()
+        ]
+    )
+
+_configure_logging()
+logger = logging.getLogger(__name__)
 
 TODAY = config.TODAY
 TICKER_LIST = config.TICKER_LIST
 
+
 def main():
     # Fetch data 
-    weather_data = get_weather_data(config.QUERY)
-    print(f"Weather Data collected")
+   
+    weather_data = weather_service.get_weather_data(config.QUERY)
+    logger.info("Weather Data collected!")
     
-    astronomy_data = get_astronomy_data(config.QUERY, TODAY)
-    print(f"Astronomy Data collected")
+    astronomy_data = astronomy_service.get_astronomy_data(config.QUERY, TODAY)
+    logger.info("Astronomy Data collected!")
     
-    stock_data = get_stock_info(TICKER_LIST)
-    print(f"Stock Data collected")
+    stock_data = stocks_service.get_stock_info(TICKER_LIST)
+    logger.info("Stock Data collected!")
     
-    headlines_data = get_headline_data()
-    print(f"Headlines Data collected: {len(headlines_data)} entries")
+    headlines_data = headlines_service.get_headline_data()
+    logger.info("Headlines Data collected!")
+    
     
     # Clean and structure data
-    cleaned_weather = clean_weather_data(weather_data)
-    cleaned_astronomy = clean_astronomy_data(astronomy_data)
-    cleaned_stock = clean_stock_data(stock_data)
-    cleaned_headlines = clean_headlines_data(headlines_data)
+    cleaned_weather = data_cleaner.clean_weather_data(weather_data)
+    cleaned_astronomy = data_cleaner.clean_astronomy_data(astronomy_data)
+    cleaned_stock = data_cleaner.clean_stock_data(stock_data)
+    cleaned_headlines = data_cleaner.clean_headlines_data(headlines_data)
+    logger.info("Cleaning Data was successfull.")
     
     # Build email body
-    email_body = build_email_body(cleaned_weather, cleaned_astronomy, cleaned_stock, cleaned_headlines)
+    email_body = email_builder.build_email_body(cleaned_weather, cleaned_astronomy, cleaned_stock, cleaned_headlines)
+    logger.info("Building Email was successfull.")
     
     # Send email
-    sendEmail(config.EMAIL_FROM, config.EMAIL_TO, "Daily Report", email_body)
+    email_builder.sendEmail(config.EMAIL_FROM, config.EMAIL_TO, "Daily Report", email_body)
     
 if __name__ == "__main__":
     main()
